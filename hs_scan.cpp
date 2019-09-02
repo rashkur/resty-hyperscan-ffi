@@ -78,6 +78,10 @@ static unsigned parse_flags(const char *flags_str)
 			flags |= HS_FLAG_UTF8; break;
 		case 'W':
 			flags |= HS_FLAG_UCP; break;
+                case 'l':
+                        flags |= HS_FLAG_SOM_LEFTMOST; break;
+                case 'P':
+                        flags |= HS_FLAG_PREFILTER; break;
 		case '\r': // stray carriage-return
 			break;
 		default:
@@ -162,13 +166,14 @@ static void databases_from_file(const char *filename,
 }
 
 
-#define MAX_GROUPS 512
+#define MAX_GROUPS 16
 
 struct match_groups {
 	struct {
 		unsigned long long from;
 		unsigned long long to;
 		unsigned int id;
+		unsigned int len;
 	} groups[MAX_GROUPS];
 	int count;
 };
@@ -180,6 +185,7 @@ int on_match(unsigned int id, unsigned long long from, unsigned long long to,
 	matches->groups[matches->count].id = id;
 	matches->groups[matches->count].from = from;
 	matches->groups[matches->count].to = to;
+	matches->groups[matches->count].len = (to - from);
 	matches->count++;
 	return 0;
 }
